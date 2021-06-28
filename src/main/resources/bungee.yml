@@ -1,0 +1,4 @@
+name: ${name}
+main: at.haha007.extrajail.bungee.ExtraJailBungeePlugin
+version: ${version}
+author: ${author}

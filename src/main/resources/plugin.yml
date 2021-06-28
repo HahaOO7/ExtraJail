@@ -1,0 +1,12 @@
+name: ${name}
+version: ${project.version}
+main: at.haha007.extrajail.spigot.ExtraJailSpigotPlugin
+api-version: 1.16
+authors: [ ${author} ]
+description: BlockJail
+commands:
+  extrajail:
+    aliases:
+      - jail
+    usage: /extrajail <player> <blocks>
+    permission: extrajail.command

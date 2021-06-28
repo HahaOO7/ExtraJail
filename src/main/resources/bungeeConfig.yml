@@ -1,0 +1,12 @@
+jailServer: "MAIN"
+kickMessage: "§aCouldn't connect to Jail-Server!"
+fallbackKick: true
+sql:
+  host: "localhost"
+  database: "database"
+  username: "root"
+  password: "root"
+  useSSL: true
+  datasource: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+  blocks: "JailBlocks"
+  players: "JailPlayers"

@@ -1,0 +1,29 @@
+sql:
+  host: "localhost"
+  database: "database"
+  username: "root"
+  password: "root"
+  useSSL: true
+  datasource: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+  blocks: "JailBlocks"
+  inventories: "JailInventories"
+  players: "JailPlayers"
+jail:
+  minX: 0
+  minY: 0
+  minZ: 0
+  maxX: 0
+  maxY: 0
+  maxZ: 0
+jailLocation:
+  x: 100
+  y: 100
+  z: 100
+  yaw: 100
+  pitch: 100
+  world: "world"
+freeCommand: "tp %player_name% 0 0 0 world"
+blockedMessage: "You can't use that command while in jail."
+blockedCommands:
+  - "home"
+  - "spawn"
