@@ -99,20 +99,7 @@ public class JailPlayer {
         loading.remove(uuid);
     }
 
-    private static byte[] encode(String string) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             GZIPOutputStream gis = new GZIPOutputStream(bos)) {
-            gis.write(string.getBytes(StandardCharsets.UTF_8));
-            return bos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public void saveBlocks() {
-        YamlConfiguration cfg = new YamlConfiguration();
-        cfg.set("items", items);
         try (PreparedStatement ps = database.prepareStatement("REPLACE INTO " + PluginVariables.blockTable + " (UUID, BLOCKS) values(?, ?)")) {
             ps.setString(1, uuid.toString());
             ps.setInt(2, amount);
@@ -144,6 +131,19 @@ public class JailPlayer {
         }
     }
 
+
+    private static byte[] encode(String string) {
+        byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
+             GZIPOutputStream gos = new GZIPOutputStream(bos)) {
+            gos.write(bytes);
+            gos.close();
+            return bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     private static String decode(byte[] data) {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
