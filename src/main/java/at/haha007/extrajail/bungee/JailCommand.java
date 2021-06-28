@@ -4,9 +4,11 @@ import at.haha007.extrajail.common.JailData;
 import at.haha007.extrajail.common.MySqlDatabase;
 import at.haha007.extrajail.common.PluginVariables;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 import java.sql.PreparedStatement;
@@ -51,7 +53,7 @@ public class JailCommand extends Command {
         String reason;
         int amount;
         switch (args[1]) {
-            case "set":
+            case "set" -> {
                 if (args.length < 3) {
                     sendCommandInfo(sender);
                     return;
@@ -64,8 +66,8 @@ public class JailCommand extends Command {
                     return;
                 }
                 setJailBlocks(sender, args[0], amount, reason);
-                break;
-            case "add":
+            }
+            case "add" -> {
                 if (args.length < 3) {
                     sendCommandInfo(sender);
                     return;
@@ -78,14 +80,16 @@ public class JailCommand extends Command {
                     return;
                 }
                 addJailBlocks(sender, args[0], amount, reason);
-                break;
-            case "history":
-                sender.sendMessage(comp(RED + "Feature not implemented yet!"));
-                break;
+            }
+            case "history" -> sender.sendMessage(comp(RED + "Feature not implemented yet!"));
         }
     }
 
     private void addJailBlocks(CommandSender sender, String name, int amount, String reason) {
+        if (amount <= 0) {
+            sender.sendMessage(new ComponentBuilder("Amount must be at least 1!").color(GOLD).create());
+            return;
+        }
         UUID uuid = plugin.getUUID(name);
         if (uuid == null) {
             sender.sendMessage(comp(GOLD + "Player not found: " + name));
@@ -95,10 +99,17 @@ public class JailCommand extends Command {
             setJailBlocksLocal(uuid, getJailBlocks(uuid) + amount);
         else
             jailServer.sendData(ADD_CHANNEL, new JailData(uuid, amount).encode());
+        ProxiedPlayer p = ProxyServer.getInstance().getPlayer(uuid);
+        if (p != null && p.isConnected()) p.connect(jailServer);
         sender.sendMessage(new ComponentBuilder("Jail blocks updated!").color(GOLD).create());
+        System.out.printf("Jail player %s for reason %s.%nBlame @Haha007 for not implementing a history.%n", name, reason);
     }
 
     private void setJailBlocks(CommandSender sender, String name, int amount, String reason) {
+        if (amount <= 0) {
+            sender.sendMessage(new ComponentBuilder("Amount must be at least 1!").color(GOLD).create());
+            return;
+        }
         UUID uuid = plugin.getUUID(name);
         if (uuid == null) {
             sender.sendMessage(comp(GOLD + "Player not found: " + name));
@@ -108,7 +119,10 @@ public class JailCommand extends Command {
             setJailBlocksLocal(uuid, amount);
         else
             jailServer.sendData(SET_CHANNEL, new JailData(uuid, amount).encode());
+        ProxiedPlayer p = ProxyServer.getInstance().getPlayer(uuid);
+        if (p != null && p.isConnected()) p.connect(jailServer);
         sender.sendMessage(new ComponentBuilder("Jail blocks updated!").color(GOLD).create());
+        System.out.printf("Jail player %s for reason %s.%nBlame @Haha007 for not implementing a history.%n", name, reason);
     }
 
     private void setJailBlocksLocal(UUID uuid, int amount) {
@@ -123,8 +137,7 @@ public class JailCommand extends Command {
 
     private int getJailBlocks(UUID uuid) {
         try (PreparedStatement ps = database.prepareStatement(statement)) {
-            ps.setLong(1, uuid.getLeastSignificantBits());
-            ps.setLong(2, uuid.getMostSignificantBits());
+            ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -144,11 +157,14 @@ public class JailCommand extends Command {
             return;
         }
         try (PreparedStatement ps = database.prepareStatement(statement)) {
-            ps.setLong(1, uuid.getLeastSignificantBits());
-            ps.setLong(2, uuid.getMostSignificantBits());
+            ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                sender.sendMessage(comp(GOLD + name + ": " + AQUA + rs.getInt(1)));
+                int blocks = rs.getInt(1);
+                if (blocks == 0)
+                    sender.sendMessage(comp(GOLD + "Player not in jail: " + name));
+                else
+                    sender.sendMessage(comp(GOLD + name + ": " + AQUA + blocks));
                 return;
             }
             sender.sendMessage(comp(GOLD + "Player not in jail: " + name));

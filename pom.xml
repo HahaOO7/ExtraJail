@@ -16,7 +16,7 @@
         <mcVersion>1.17-R0.1-SNAPSHOT</mcVersion>
         <author>Haha007</author>
         <bungeeVersion>1.16-R0.5-SNAPSHOT</bungeeVersion>
-        <java.version>11</java.version>
+        <java.version>16</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -27,8 +27,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
             <plugin>

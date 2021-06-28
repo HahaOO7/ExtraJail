@@ -4,7 +4,7 @@ sql:
   username: "root"
   password: "root"
   useSSL: true
-  datasource: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+  datasource: com.mysql.jdbc.jdbc2.optional.MysqlDataSource #com.mysql.cj.jdbc.Driver
   blocks: "JailBlocks"
   inventories: "JailInventories"
   players: "JailPlayers"
@@ -22,7 +22,10 @@ jailLocation:
   yaw: 100
   pitch: 100
   world: "world"
-freeCommand: "tp %player_name% 0 0 0 world"
+title: "Blocks left:"
+subtitle: "%blocks%"
+respawnTime: 100000
+freeCommand: "tp %player% 0 0 0 world"
 blockedMessage: "You can't use that command while in jail."
 blockedCommands:
   - "home"

@@ -123,7 +123,7 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
         try (PreparedStatement ps = database.prepareStatement(statement)) {
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
-            if (rs.next())
+            if (rs.next() && rs.getInt(1) > 0)
                 player.connect(jailServer, (success, error) -> {
                     if (!success) {
                         player.disconnect(TextComponent.fromLegacyText(kickMessage));

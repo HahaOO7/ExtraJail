@@ -36,34 +36,37 @@ public class JailPlayer {
 
     private static final Map<UUID, JailPlayer> cache = new HashMap<>();
     private static final Set<UUID> loading = new HashSet<>();
-    private static final String freeCommand;
 
     static {
-        freeCommand = ExtraJailSpigotPlugin.getInstance().getCfg().getConfig().getString("freeCommand");
+        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(ExtraJailSpigotPlugin.getInstance(), () ->{
+            cache.values().parallelStream().forEach(JailPlayer::saveBlocks);
+            cleanCache();
+        },1000,1000);
     }
 
     static JailPlayer get(UUID uuid) {
-        if (cache.size() > 200)
-            cleanCache();
         if (!cache.containsKey(uuid))
             loadJailPlayer(uuid);
         return cache.get(uuid);
     }
 
     public static void clearCache() {
-        cache.keySet().forEach(id -> {
-            cache.get(id).saveBlocks();
-            cache.get(id).saveInventory();
-            cache.remove(id);
+        cache.values().forEach(id -> {
+            id.saveBlocks();
+            id.saveInventory();
         });
+        cache.clear();
     }
 
     private static void cleanCache() {
-        cache.keySet().stream().filter(id -> Bukkit.getPlayer(id) == null).forEach(id -> {
-            cache.get(id).saveBlocks();
-            cache.get(id).saveInventory();
-            cache.remove(id);
-        });
+        cache.keySet().stream().filter(id -> Bukkit.getPlayer(id) == null).collect(Collectors.toSet()).forEach(JailPlayer::deCache);
+    }
+
+    public static void deCache(UUID uuid) {
+        if(!cache.containsKey(uuid))return;
+        cache.get(uuid).saveBlocks();
+        cache.get(uuid).saveInventory();
+        cache.remove(uuid);
     }
 
     private synchronized static void loadJailPlayer(UUID uuid) {
@@ -110,7 +113,6 @@ public class JailPlayer {
     public void saveBlocks() {
         YamlConfiguration cfg = new YamlConfiguration();
         cfg.set("items", items);
-        String inventoryString = cfg.saveToString();
         try (PreparedStatement ps = database.prepareStatement("REPLACE INTO " + PluginVariables.blockTable + " (UUID, BLOCKS) values(?, ?)")) {
             ps.setString(1, uuid.toString());
             ps.setInt(2, amount);
@@ -144,8 +146,8 @@ public class JailPlayer {
 
 
     private static String decode(byte[] data) {
-        try (ByteArrayInputStream bos = new ByteArrayInputStream(data);
-             GZIPInputStream gis = new GZIPInputStream(bos)) {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
+             GZIPInputStream gis = new GZIPInputStream(bis)) {
             return new String(gis.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();

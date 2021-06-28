@@ -16,7 +16,7 @@ public class CommandBlocker implements Listener {
 
     public CommandBlocker() {
         plugin = ExtraJailSpigotPlugin.getInstance();
-        FileConfiguration cfg = plugin.getCfg().getConfig();
+        FileConfiguration cfg = plugin.getConfig();
         blockedCommands = new HashSet<>(cfg.getStringList("blockedCommands"));
         blockedMessage = cfg.getString("blockedMessage");
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
@@ -26,6 +26,7 @@ public class CommandBlocker implements Listener {
     void onCommand(PlayerCommandPreprocessEvent event) {
         if (JailPlayer.get(event.getPlayer().getUniqueId()).isInJail() &&
                 blockedCommands.contains(event.getMessage().split(" ")[0].toLowerCase())) {
+            event.getPlayer().sendMessage(blockedMessage);
             event.setCancelled(true);
         }
     }

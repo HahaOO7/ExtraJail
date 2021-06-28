@@ -4,6 +4,7 @@ import at.haha007.extrajail.common.MySqlDatabase;
 import at.haha007.extrajail.common.PluginVariables;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -13,9 +14,8 @@ public final class ExtraJailSpigotPlugin extends JavaPlugin {
     @Getter
     private  JailPluginMessageHandler channel;
     @Getter
-    private  SpigotConfig cfg;
-    @Getter
     private MySqlDatabase database;
+    private Jail jail;
 
     /*
       jail player from any server
@@ -42,19 +42,26 @@ public final class ExtraJailSpigotPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         channel = new JailPluginMessageHandler();
-        cfg = new SpigotConfig();
-        cfg.reloadConfig();
+        saveDefaultConfig();
+        reloadConfig();
         initDatabase();
+        Bukkit.getScheduler().runTask(this, this::enable);
+    }
+
+    private void enable() {
+        new CommandBlocker();
+        jail = new Jail();
     }
 
     @Override
     public void onDisable() {
         JailPlayer.clearCache();
+        jail.respawnAllBlocks();
     }
 
     @SneakyThrows
     private void initDatabase() {
-        FileConfiguration cfg = this.cfg.getConfig();
+        FileConfiguration cfg = getConfig();
         database = new MySqlDatabase(cfg.getString("sql.host"),
                 cfg.getString("sql.username"),
                 cfg.getString("sql.password"),

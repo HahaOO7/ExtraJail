@@ -19,7 +19,7 @@ public class PlayerJailEvent extends PlayerEvent {
     }
 
     @Getter
-    private JailPlayer jailPlayer;
+    private final JailPlayer jailPlayer;
 
     public PlayerJailEvent(Player player, JailPlayer jailPlayer) {
         super(player);

@@ -25,7 +25,6 @@ public class JailPluginMessageHandler {
         if (jd == null) throw new IOException("JailPlayer couldn't be decoded!");
         JailPlayer jp = JailPlayer.get(jd.getUuid());
         jp.setAmount(jp.getAmount() + jd.getBlocks());
-        System.out.println("AddMessageReceived: Tag: " + channel + "  UUID: " + jd.getUuid() + "   Blocks: " + jd.getBlocks());
     }
 
     @SneakyThrows
@@ -34,6 +33,5 @@ public class JailPluginMessageHandler {
         if (jd == null) throw new IOException("JailPlayer couldn't be decoded!");
         JailPlayer jp = JailPlayer.get(jd.getUuid());
         jp.setAmount(jd.getBlocks());
-        System.out.println("SetMessageReceived: Tag: " + channel + "  UUID: " + jd.getUuid() + "   Blocks: " + jd.getBlocks());
     }
 }
