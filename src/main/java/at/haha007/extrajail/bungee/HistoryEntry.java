@@ -14,6 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static net.md_5.bungee.api.ChatColor.*;
+
 @AllArgsConstructor
 public class HistoryEntry {
     @Getter
@@ -70,7 +72,7 @@ public class HistoryEntry {
                 rs.getString(5));
     }
 
-    public void insert(){
+    public void insert() {
         try {
             PreparedStatement ps = database.prepareStatement("INSERT INTO " + PluginVariables.historyTable +
                     " (UUID, JAILER, REASON, AMOUNT, ACTION, TIME) VAlUES (?,?,?,?,?,?)");
@@ -88,11 +90,13 @@ public class HistoryEntry {
 
     @Override
     public String toString() {
-        return String.format("%s [%s][%d][%s] %s",
-                jailerName,
-                action,
-                amount,
+        return String.format("%s%s%s [%s%s%s][%s%d%s][%s%s%s] %s%s",
+                GOLD, jailerName, YELLOW,
+                GOLD, action, YELLOW,
+                GOLD, amount, YELLOW,
+                GOLD,
                 new SimpleDateFormat("yyyy-MM-dd").format(new Date(timeCreated)),
-                reason);
+                YELLOW,
+                AQUA, reason);
     }
 }

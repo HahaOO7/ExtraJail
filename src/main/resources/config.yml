@@ -4,7 +4,7 @@ sql:
   username: "root"
   password: "root"
   useSSL: true
-  datasource: com.mysql.jdbc.jdbc2.optional.MysqlDataSource #com.mysql.cj.jdbc.Driver
+  datasource: com.mysql.cj.jdbc.Driver
   blocks: "JailBlocks"
   inventories: "JailInventories"
   players: "JailPlayers"

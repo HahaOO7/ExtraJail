@@ -92,7 +92,7 @@ public class JailCommand extends Command {
                 List<HistoryEntry> history = HistoryEntry.getHistory(uuid);
                 history.sort(Comparator.comparingLong(HistoryEntry::getTimeCreated));
                 sender.sendMessage(comp(GOLD + "Jail History of " + AQUA + args[0]));
-                history.forEach(e -> sender.sendMessage(comp(GOLD + e.toString())));
+                history.forEach(e -> sender.sendMessage(comp(e.toString())));
             }
         }
     }
