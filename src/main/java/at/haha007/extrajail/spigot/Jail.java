@@ -164,6 +164,12 @@ public class Jail implements Listener {
     }
 
     @EventHandler
+    void onItemDrop(PlayerDropItemEvent event) {
+        if (JailPlayer.get(event.getPlayer().getUniqueId()).isInJail())
+            event.setCancelled(true);
+    }
+
+    @EventHandler
     void onPlayerDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player p)) return;
         event.setCancelled(true);
