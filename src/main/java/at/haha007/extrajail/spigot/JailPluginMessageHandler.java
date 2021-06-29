@@ -25,6 +25,9 @@ public class JailPluginMessageHandler {
         if (jd == null) throw new IOException("JailPlayer couldn't be decoded!");
         JailPlayer jp = JailPlayer.get(jd.getUuid());
         jp.setAmount(jp.getAmount() + jd.getBlocks());
+        Player p = Bukkit.getPlayer(jd.getUuid());
+        if (p != null && p.isOnline())
+            ExtraJailSpigotPlugin.getInstance().getJail().checkJail(p, p.getLocation());
     }
 
     @SneakyThrows
@@ -33,5 +36,8 @@ public class JailPluginMessageHandler {
         if (jd == null) throw new IOException("JailPlayer couldn't be decoded!");
         JailPlayer jp = JailPlayer.get(jd.getUuid());
         jp.setAmount(jd.getBlocks());
+        Player p = Bukkit.getPlayer(jd.getUuid());
+        if (p != null && p.isOnline())
+            ExtraJailSpigotPlugin.getInstance().getJail().checkJail(p, p.getLocation());
     }
 }

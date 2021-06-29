@@ -15,6 +15,7 @@ public final class ExtraJailSpigotPlugin extends JavaPlugin {
     private  JailPluginMessageHandler channel;
     @Getter
     private MySqlDatabase database;
+    @Getter
     private Jail jail;
 
     /*

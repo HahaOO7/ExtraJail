@@ -71,6 +71,11 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
                 "(UUID varchar(36), BLOCKS int(32), PRIMARY KEY (UUID))");
         tryExecuteUpdate("CREATE TABLE IF NOT EXISTS " + PluginVariables.playerTable +
                 "(UUID varchar(36), NAME varchar(100), PRIMARY KEY (UUID, NAME))");
+        try {
+            HistoryEntry.createTable();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     private void tryExecuteUpdate(String statement) {
@@ -86,6 +91,7 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
         cfg.reloadConfig();
         PluginVariables.blockTable = cfg.getConfig().getString("sql.blocks");
         PluginVariables.playerTable = cfg.getConfig().getString("sql.players");
+        PluginVariables.historyTable = cfg.getConfig().getString("sql.history");
         kickMessage = cfg.getConfig().getString("kickMessage");
         jailServer = getProxy().getServerInfo(cfg.getConfig().getString("jailServer"));
         statement = "SELECT BLOCKS FROM " + PluginVariables.blockTable + " WHERE UUID = ?";
@@ -140,6 +146,19 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
             ResultSet rs = ps.executeQuery();
             if (rs.next())
                 return UUID.fromString(rs.getString(1));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+    public String getName(UUID uuid) {
+        try (PreparedStatement ps = database.prepareStatement("SELECT NAME FROM " + PluginVariables.playerTable + " WHERE UUID = ?")) {
+            ps.setString(1, uuid.toString());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getString(1);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

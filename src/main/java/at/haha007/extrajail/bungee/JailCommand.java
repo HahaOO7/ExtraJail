@@ -15,6 +15,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 import static at.haha007.extrajail.common.PluginVariables.ADD_CHANNEL;
@@ -42,6 +44,10 @@ public class JailCommand extends Command {
             /jail <name> add <amount> <reason>
             /jail <name> set <amount> <reason>
          */
+        if(!(sender instanceof ProxiedPlayer player)){
+            sender.sendMessage(comp(GOLD + "This command can only be executed by players."));
+            return;
+        }
         if (args.length == 0) {
             sendCommandInfo(sender);
             return;
@@ -65,7 +71,7 @@ public class JailCommand extends Command {
                     sendCommandInfo(sender);
                     return;
                 }
-                setJailBlocks(sender, args[0], amount, reason);
+                setJailBlocks(player, args[0], amount, reason);
             }
             case "add" -> {
                 if (args.length < 3) {
@@ -79,13 +85,19 @@ public class JailCommand extends Command {
                     sendCommandInfo(sender);
                     return;
                 }
-                addJailBlocks(sender, args[0], amount, reason);
+                addJailBlocks(player, args[0], amount, reason);
             }
-            case "history" -> sender.sendMessage(comp(RED + "Feature not implemented yet!"));
+            case "history" -> {
+                UUID uuid = plugin.getUUID(args[0]);
+                List<HistoryEntry> history = HistoryEntry.getHistory(uuid);
+                history.sort(Comparator.comparingLong(HistoryEntry::getTimeCreated));
+                sender.sendMessage(comp(GOLD + "Jail History of " + AQUA + args[0]));
+                history.forEach(e -> sender.sendMessage(comp(GOLD + e.toString())));
+            }
         }
     }
 
-    private void addJailBlocks(CommandSender sender, String name, int amount, String reason) {
+    private void addJailBlocks(ProxiedPlayer sender, String name, int amount, String reason) {
         if (amount <= 0) {
             sender.sendMessage(new ComponentBuilder("Amount must be at least 1!").color(GOLD).create());
             return;
@@ -100,12 +112,13 @@ public class JailCommand extends Command {
         else
             jailServer.sendData(ADD_CHANNEL, new JailData(uuid, amount).encode());
         ProxiedPlayer p = ProxyServer.getInstance().getPlayer(uuid);
-        if (p != null && p.isConnected()) p.connect(jailServer);
+        if (p != null && p.isConnected() && p.getServer().getInfo() != jailServer)
+            p.connect(jailServer);
         sender.sendMessage(new ComponentBuilder("Jail blocks updated!").color(GOLD).create());
-        System.out.printf("Jail player %s for reason %s.%nBlame @Haha007 for not implementing a history.%n", name, reason);
+        new HistoryEntry(sender.getUniqueId(), sender.getName(), uuid, name, reason, System.currentTimeMillis(), amount, "add").insert();
     }
 
-    private void setJailBlocks(CommandSender sender, String name, int amount, String reason) {
+    private void setJailBlocks(ProxiedPlayer sender, String name, int amount, String reason) {
         if (amount <= 0) {
             sender.sendMessage(new ComponentBuilder("Amount must be at least 1!").color(GOLD).create());
             return;
@@ -120,9 +133,10 @@ public class JailCommand extends Command {
         else
             jailServer.sendData(SET_CHANNEL, new JailData(uuid, amount).encode());
         ProxiedPlayer p = ProxyServer.getInstance().getPlayer(uuid);
-        if (p != null && p.isConnected()) p.connect(jailServer);
+        if (p != null && p.isConnected() && p.getServer().getInfo() != jailServer)
+            p.connect(jailServer);
         sender.sendMessage(new ComponentBuilder("Jail blocks updated!").color(GOLD).create());
-        System.out.printf("Jail player %s for reason %s.%nBlame @Haha007 for not implementing a history.%n", name, reason);
+        new HistoryEntry(sender.getUniqueId(), sender.getName(), uuid, name, reason, System.currentTimeMillis(), amount, "set").insert();
     }
 
     private void setJailBlocksLocal(UUID uuid, int amount) {

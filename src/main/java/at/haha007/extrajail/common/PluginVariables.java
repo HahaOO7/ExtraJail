@@ -7,4 +7,5 @@ public enum PluginVariables {
     public static String playerTable;
     public static String blockTable;
     public static String inventoryTable;
+    public static String historyTable;
 }

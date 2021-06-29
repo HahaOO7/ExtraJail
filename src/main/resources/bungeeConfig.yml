@@ -10,3 +10,4 @@ sql:
   datasource: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
   blocks: "JailBlocks"
   players: "JailPlayers"
+  history: "JailHistory"

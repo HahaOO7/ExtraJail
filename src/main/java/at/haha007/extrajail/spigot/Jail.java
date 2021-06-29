@@ -91,7 +91,7 @@ public class Jail implements Listener {
         return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    private void checkJail(Player player, Location location) {
+    public void checkJail(Player player, Location location) {
         if (player.hasPermission("extrajail.bypass")) return;
         JailPlayer jp = JailPlayer.get(player.getUniqueId());
         if (!jp.isInJail()) {
@@ -120,6 +120,7 @@ public class Jail implements Listener {
     }
 
     private void freePlayer(Player player, JailPlayer jp) {
+        jp.saveBlocks();
         Bukkit.getServer().getPluginManager().callEvent(new PlayerFreeEvent(player, jp));
         giveItems(player, jp.getItems());
         jp.setItems(null);
