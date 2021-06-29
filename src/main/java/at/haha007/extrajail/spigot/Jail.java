@@ -129,10 +129,15 @@ public class Jail implements Listener {
 
     private void giveItems(Player player, List<ItemStack> items) {
         PlayerInventory inv = player.getInventory();
-        inv.clear();
+        inv.clear();List<ItemStack> leftItems = new ArrayList<>();
         for (ItemStack item : items) {
             if (item == null) continue;
-            inv.addItem(item);
+            HashMap<Integer, ItemStack> left = inv.addItem(item);
+            left.values().stream().filter(i -> i.getAmount() != 0).forEach(leftItems::add);
+        }
+        if(!leftItems.isEmpty()){
+            System.err.println("Couldn't give all items to " + player.getName());
+            System.err.println("Items left: " + leftItems);
         }
     }
 
