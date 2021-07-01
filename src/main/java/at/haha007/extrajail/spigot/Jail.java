@@ -111,12 +111,13 @@ public class Jail implements Listener {
         PlayerInventory inv = player.getInventory();
         if (!jp.isInventorySaved()) {
             List<ItemStack> items = new ArrayList<>(Arrays.asList(inv.getContents()));
-            items.removeIf(Objects::isNull);
             jp.setItems(items);
         }
-        inv.clear();
-        inv.setItem(0, jailTool);
-        inv.setHeldItemSlot(0);
+        if (!jailTool.equals(inv.getItem(0))) {
+            inv.clear();
+            inv.setItem(0, jailTool);
+            inv.setHeldItemSlot(0);
+        }
     }
 
     private void freePlayer(Player player, JailPlayer jp) {
@@ -129,16 +130,8 @@ public class Jail implements Listener {
 
     private void giveItems(Player player, List<ItemStack> items) {
         PlayerInventory inv = player.getInventory();
-        inv.clear();List<ItemStack> leftItems = new ArrayList<>();
-        for (ItemStack item : items) {
-            if (item == null) continue;
-            HashMap<Integer, ItemStack> left = inv.addItem(item);
-            left.values().stream().filter(i -> i.getAmount() != 0).forEach(leftItems::add);
-        }
-        if(!leftItems.isEmpty()){
-            System.err.println("Couldn't give all items to " + player.getName());
-            System.err.println("Items left: " + leftItems);
-        }
+        inv.clear();
+        inv.setContents(items.toArray(new ItemStack[0]));
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -177,6 +170,7 @@ public class Jail implements Listener {
     @EventHandler
     void onPlayerDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player p)) return;
+        if (!JailPlayer.get(p.getUniqueId()).isInJail()) return;
         event.setCancelled(true);
         p.setHealth(20);
         p.teleport(spawn);
