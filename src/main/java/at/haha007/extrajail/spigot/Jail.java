@@ -43,7 +43,7 @@ public class Jail implements Listener {
         freeCommand = cfg.getString("freeCommand");
         title = cfg.getString("title");
         subtitle = cfg.getString("subtitle");
-        respawnTime = cfg.getLong("respawnTime");
+        respawnTime = cfg.getLong("respawnTime") * 1000;
         box = getBox(Objects.requireNonNull(cfg.getConfigurationSection("jail")));
         spawn = getLocation(Objects.requireNonNull(cfg.getConfigurationSection("jailLocation")));
     }

@@ -24,7 +24,7 @@ jailLocation:
   world: "world"
 title: "Blocks left:"
 subtitle: "%blocks%"
-respawnTime: 100000
+respawnTime: 100
 freeCommand: "tp %player% 0 0 0 world"
 blockedMessage: "You can't use that command while in jail."
 blockedCommands:
