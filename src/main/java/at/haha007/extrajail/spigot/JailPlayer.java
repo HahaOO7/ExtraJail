@@ -100,12 +100,21 @@ public class JailPlayer {
     }
 
     public void saveBlocks() {
-        try (PreparedStatement ps = database.prepareStatement("REPLACE INTO " + PluginVariables.blockTable + " (UUID, BLOCKS) values(?, ?)")) {
-            ps.setString(1, uuid.toString());
-            ps.setInt(2, amount);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if(amount > 0){
+            try (PreparedStatement ps = database.prepareStatement("REPLACE INTO " + PluginVariables.blockTable + " (UUID, BLOCKS) values(?, ?)")) {
+                ps.setString(1, uuid.toString());
+                ps.setInt(2, amount);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }else{
+            try (PreparedStatement ps = database.prepareStatement("DELETE FROM " + PluginVariables.blockTable + " WHERE UUID = ?")) {
+                ps.setString(1, uuid.toString());
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
