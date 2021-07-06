@@ -30,7 +30,6 @@ import static at.haha007.extrajail.common.PluginVariables.ADD_CHANNEL;
 
 public class ExtraJailBungeePlugin extends Plugin implements Listener {
 
-
     private static final JSONParser parser = new JSONParser();
     Cache<String, UUID> uuidCache;
     Cache<UUID, String> nameCache;
@@ -73,8 +72,6 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
         database.connect();
         tryExecuteUpdate("CREATE TABLE IF NOT EXISTS " + PluginVariables.blockTable +
                 "(UUID varchar(36), BLOCKS int(32), PRIMARY KEY (UUID))");
-        tryExecuteUpdate("CREATE TABLE IF NOT EXISTS " + PluginVariables.playerTable +
-                "(UUID varchar(36), NAME varchar(100), PRIMARY KEY (UUID, NAME))");
         try {
             HistoryEntry.createTable();
         } catch (SQLException e) {
@@ -94,7 +91,6 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
         cfg = new BungeeConfig();
         cfg.reloadConfig();
         PluginVariables.blockTable = cfg.getConfig().getString("sql.blocks");
-        PluginVariables.playerTable = cfg.getConfig().getString("sql.players");
         PluginVariables.historyTable = cfg.getConfig().getString("sql.history");
         kickMessage = cfg.getConfig().getString("kickMessage");
         jailServer = getProxy().getServerInfo(cfg.getConfig().getString("jailServer"));
@@ -168,17 +164,7 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
             nameCache.put(uuid, name);
             return name;
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-        try (PreparedStatement ps = database.prepareStatement("SELECT NAME FROM " + PluginVariables.playerTable + " WHERE UUID = ?")) {
-            ps.setString(1, uuid.toString());
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return rs.getString(1);
-        } catch (SQLException e) {
-            e.printStackTrace();
             return null;
         }
-        return null;
     }
 }

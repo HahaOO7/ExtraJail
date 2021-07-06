@@ -71,10 +71,7 @@ public final class ExtraJailSpigotPlugin extends JavaPlugin {
                 cfg.getBoolean("sql.useSSL"));
         database.connect();
         PluginVariables.blockTable = cfg.getString("sql.blocks");
-        PluginVariables.playerTable = cfg.getString("sql.players");
         PluginVariables.inventoryTable = cfg.getString("sql.inventories");
-        database.prepareStatement("CREATE TABLE IF NOT EXISTS " + PluginVariables.playerTable +
-                "(UUID varchar(36), NAME varchar(100), PRIMARY KEY (UUID, NAME))").executeUpdate();
         database.prepareStatement("CREATE TABLE IF NOT EXISTS " + PluginVariables.inventoryTable +
                 "(UUID varchar(36), INVENTORY blob, PRIMARY KEY (UUID))").executeUpdate();
         database.prepareStatement("CREATE TABLE IF NOT EXISTS " + PluginVariables.blockTable +
