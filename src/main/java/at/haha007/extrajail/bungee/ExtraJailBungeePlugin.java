@@ -2,6 +2,8 @@ package at.haha007.extrajail.bungee;
 
 import at.haha007.extrajail.common.MySqlDatabase;
 import at.haha007.extrajail.common.PluginVariables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -11,7 +13,13 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.event.EventHandler;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,17 +31,10 @@ import static at.haha007.extrajail.common.PluginVariables.ADD_CHANNEL;
 public class ExtraJailBungeePlugin extends Plugin implements Listener {
 
 
-    /*
-      cmd
-      onPlayerConnect:
-        check jail
-      onPlayerChangeServer:
-        check jail
-      check jail:
-        send player to jail server
-      bungee -> spigot
-        add, set
-     */
+    private static final JSONParser parser = new JSONParser();
+    Cache<String, UUID> uuidCache;
+    Cache<UUID, String> nameCache;
+
     @Getter
     private static ExtraJailBungeePlugin instance;
     @Getter
@@ -49,6 +50,9 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
     public void onEnable() {
         instance = this;
         loadConfig();
+        int cacheSize = cfg.getConfig().getInt("cacheSize");
+        uuidCache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
+        nameCache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
         initSql();
         getProxy().getPluginManager().registerCommand(this, new JailCommand());
         getProxy().getPluginManager().registerListener(this, this);
@@ -73,8 +77,8 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
                 "(UUID varchar(36), NAME varchar(100), PRIMARY KEY (UUID, NAME))");
         try {
             HistoryEntry.createTable();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -97,19 +101,6 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
         statement = "SELECT BLOCKS FROM " + PluginVariables.blockTable + " WHERE UUID = ?";
     }
 
-    private void savePlayerUniqueId(ProxiedPlayer player) {
-        UUID uuid = player.getUniqueId();
-        String name = player.getName();
-        try (PreparedStatement ps = database.prepareStatement("REPLACE INTO " + PluginVariables.playerTable + " (UUID, NAME) VAlUES (?,?)")) {
-            ps.setString(1, uuid.toString());
-            ps.setString(2, name);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     @EventHandler
     public void onServerConnect(ServerConnectEvent event) {
         checkJailAsync(event.getPlayer(), event.getTarget() != jailServer);
@@ -117,7 +108,6 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
 
     private void checkJailAsync(ProxiedPlayer player, boolean checkJail) {
         getProxy().getScheduler().runAsync(this, () -> {
-            savePlayerUniqueId(player);
             if (checkJail) {
                 checkJail(player);
             }
@@ -141,19 +131,45 @@ public class ExtraJailBungeePlugin extends Plugin implements Listener {
     }
 
     public UUID getUUID(String name) {
-        try (PreparedStatement ps = database.prepareStatement("SELECT UUID FROM " + PluginVariables.playerTable + " WHERE NAME = ?")) {
-            ps.setString(1, name);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return UUID.fromString(rs.getString(1));
-        } catch (SQLException e) {
-            e.printStackTrace();
+        UUID uuid = uuidCache.getIfPresent(name);
+        if (uuid != null) {
+            return uuid;
+        }
+        try {
+            URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
+            InputStream is = url.openStream();
+            StringBuilder s = new StringBuilder(new String(is.readAllBytes()));
+            is.close();
+            s = new StringBuilder(((JSONObject) parser.parse(s.toString())).get("id").toString());
+            s.insert(20, '-');
+            s.insert(16, '-');
+            s.insert(12, '-');
+            s.insert(8, '-');
+            uuid = UUID.fromString(s.toString());
+            uuidCache.put(name, uuid);
+            return uuid;
+        } catch (IOException | ParseException e) {
             return null;
         }
-        return null;
     }
 
     public String getName(UUID uuid) {
+        String name = nameCache.getIfPresent(uuid);
+        if (name != null) {
+            return name;
+        }
+        try {
+            URL url = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", ""));
+            InputStream is = url.openStream();
+            String s = new String(is.readAllBytes());
+            is.close();
+            name = ((JSONObject) parser.parse(s)).get("name").toString();
+            uuidCache.put(name, uuid);
+            nameCache.put(uuid, name);
+            return name;
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
         try (PreparedStatement ps = database.prepareStatement("SELECT NAME FROM " + PluginVariables.playerTable + " WHERE UUID = ?")) {
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();

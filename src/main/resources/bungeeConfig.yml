@@ -1,6 +1,7 @@
 jailServer: "MAIN"
 kickMessage: "§aCouldn't connect to Jail-Server!"
 fallbackKick: true
+cacheSize: 200
 sql:
   host: "localhost"
   database: "database"
