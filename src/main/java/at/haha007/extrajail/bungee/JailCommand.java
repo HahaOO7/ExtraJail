@@ -21,7 +21,8 @@ import java.util.UUID;
 
 import static at.haha007.extrajail.common.PluginVariables.ADD_CHANNEL;
 import static at.haha007.extrajail.common.PluginVariables.SET_CHANNEL;
-import static net.md_5.bungee.api.ChatColor.*;
+import static net.md_5.bungee.api.ChatColor.AQUA;
+import static net.md_5.bungee.api.ChatColor.GOLD;
 
 public class JailCommand extends Command {
     private final ServerInfo jailServer;
@@ -44,7 +45,7 @@ public class JailCommand extends Command {
             /jail <name> add <amount> <reason>
             /jail <name> set <amount> <reason>
          */
-        if(!(sender instanceof ProxiedPlayer player)){
+        if (!(sender instanceof ProxiedPlayer player)) {
             sender.sendMessage(comp(GOLD + "This command can only be executed by players."));
             return;
         }
@@ -115,7 +116,9 @@ public class JailCommand extends Command {
         if (p != null && p.isConnected() && p.getServer().getInfo() != jailServer)
             p.connect(jailServer);
         sender.sendMessage(new ComponentBuilder("Jail blocks updated!").color(GOLD).create());
-        new HistoryEntry(sender.getUniqueId(), sender.getName(), uuid, name, reason, System.currentTimeMillis(), amount, "add").insert();
+        HistoryEntry history = new HistoryEntry(sender.getUniqueId(), sender.getName(), uuid, name, reason, System.currentTimeMillis(), amount, "add");
+        ProxyServer.getInstance().getPluginManager().dispatchCommand(sender, "warn " + name + " [JAIL][add][" + amount + "] " + reason);
+        history.insert();
     }
 
     private void setJailBlocks(ProxiedPlayer sender, String name, int amount, String reason) {
@@ -136,7 +139,9 @@ public class JailCommand extends Command {
         if (p != null && p.isConnected() && p.getServer().getInfo() != jailServer)
             p.connect(jailServer);
         sender.sendMessage(new ComponentBuilder("Jail blocks updated!").color(GOLD).create());
-        new HistoryEntry(sender.getUniqueId(), sender.getName(), uuid, name, reason, System.currentTimeMillis(), amount, "set").insert();
+        HistoryEntry history = new HistoryEntry(sender.getUniqueId(), sender.getName(), uuid, name, reason, System.currentTimeMillis(), amount, "set");
+        ProxyServer.getInstance().getPluginManager().dispatchCommand(sender, "warn " + name + " [JAIL][set][" + amount + "] " + reason);
+        history.insert();
     }
 
     private void setJailBlocksLocal(UUID uuid, int amount) {
