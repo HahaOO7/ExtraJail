@@ -13,9 +13,9 @@
 
     <description>BlockJail</description>
     <properties>
-        <mcVersion>1.17-R0.1-SNAPSHOT</mcVersion>
+        <mcVersion>1.17.1-R0.1-SNAPSHOT</mcVersion>
         <author>Haha007</author>
-        <bungeeVersion>1.16-R0.5-SNAPSHOT</bungeeVersion>
+        <bungeeVersion>1.17-R0.1-SNAPSHOT</bungeeVersion>
         <java.version>16</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -75,12 +75,12 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.17-R0.1-SNAPSHOT</version>
+            <version>${mcVersion}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper</artifactId>
             <version>${mcVersion}</version>
             <scope>provided</scope>
         </dependency>
@@ -92,10 +92,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
+            <groupId>io.github.waterfallmc</groupId>
+            <artifactId>waterfall-api</artifactId>
             <version>${bungeeVersion}</version>
-            <type>javadoc</type>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -108,7 +107,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>20.1.0</version>
+            <version>21.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

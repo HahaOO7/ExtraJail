@@ -36,12 +36,13 @@ public class JailPlayer {
 
     private static final Map<UUID, JailPlayer> cache = new HashMap<>();
     private static final Set<UUID> loading = new HashSet<>();
+    private static final int taskID;
 
     static {
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(ExtraJailSpigotPlugin.getInstance(), () ->{
+        taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(ExtraJailSpigotPlugin.getInstance(), () -> {
             cache.values().parallelStream().forEach(JailPlayer::saveBlocks);
             cleanCache();
-        },1000,1000);
+        }, 1000, 1000);
     }
 
     static JailPlayer get(UUID uuid) {
@@ -51,6 +52,7 @@ public class JailPlayer {
     }
 
     public static void clearCache() {
+        Bukkit.getScheduler().cancelTask(taskID);
         cache.values().forEach(id -> {
             id.saveBlocks();
             id.saveInventory();
@@ -63,7 +65,7 @@ public class JailPlayer {
     }
 
     public static void deCache(UUID uuid) {
-        if(!cache.containsKey(uuid))return;
+        if (!cache.containsKey(uuid)) return;
         cache.get(uuid).saveBlocks();
         cache.get(uuid).saveInventory();
         cache.remove(uuid);
@@ -100,7 +102,7 @@ public class JailPlayer {
     }
 
     public void saveBlocks() {
-        if(amount > 0){
+        if (amount > 0) {
             try (PreparedStatement ps = database.prepareStatement("REPLACE INTO " + PluginVariables.blockTable + " (UUID, BLOCKS) values(?, ?)")) {
                 ps.setString(1, uuid.toString());
                 ps.setInt(2, amount);
@@ -108,7 +110,7 @@ public class JailPlayer {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }else{
+        } else {
             try (PreparedStatement ps = database.prepareStatement("DELETE FROM " + PluginVariables.blockTable + " WHERE UUID = ?")) {
                 ps.setString(1, uuid.toString());
                 ps.executeUpdate();

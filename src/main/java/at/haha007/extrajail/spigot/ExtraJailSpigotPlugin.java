@@ -52,6 +52,7 @@ public final class ExtraJailSpigotPlugin extends JavaPlugin {
     private void enable() {
         new CommandBlocker();
         jail = new Jail();
+        JailPlayer.clearCache();
     }
 
     @Override
